@@ -101,6 +101,7 @@
     .product-img {
       position: relative;
       height: 220px;
+      aspect-ratio: unset !important;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -110,6 +111,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      display: block;
       transition: transform 0.4s ease;
     }
     .product-card:hover .product-img img {
@@ -467,7 +469,8 @@
 
     @media (max-width: 600px) {
       .shop-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.8rem !important; }
-      .product-img { height: 140px !important; }
+      .product-img { height: 140px !important; aspect-ratio: unset !important; }
+      .product-img img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; }
       .product-img .emoji-placeholder { font-size: 3rem; }
       .product-body { padding: 0.75rem; gap: 0.3rem; }
       .product-name { font-size: 0.85rem; }
