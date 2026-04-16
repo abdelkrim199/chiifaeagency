@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تفاصيل الخدمة — Chifae Agency</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .service-detail-page { padding: 6rem 0 4rem; background: var(--off-white); }
+
+    /* === Layout === */
+    .sdp-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    /* === Gallery === */
+    .sdp-gallery {
+      position: sticky;
+      top: 90px;
+    }
+    .sdp-main-img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--dark-2);
+      border: 1px solid rgba(0,0,0,0.07);
+      margin-bottom: 0.75rem;
+      cursor: zoom-in;
+    }
+    .sdp-main-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .sdp-main-img:hover img { transform: scale(1.04); }
+
+    .sdp-thumbs {
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+    .sdp-thumb {
+      width: calc(25% - 0.45rem);
+      aspect-ratio: 1;
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      opacity: 0.6;
+      transition: opacity 0.2s, border-color 0.2s;
+      background: var(--dark-2);
+    }
+    .sdp-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .sdp-thumb:hover { opacity: 0.88; }
+    .sdp-thumb.active {
+      border-color: var(--magenta);
+      opacity: 1;
+    }
+
+    /* === Lightbox === */
+    .sdp-lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+    .sdp-lightbox.open { display: flex; }
+    .sdp-lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: var(--radius-lg);
+      object-fit: contain;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .sdp-lb-close {
+      position: fixed;
+      top: 1.5rem;
+      left: 1.5rem;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sdp-lb-prev, .sdp-lb-next {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #fff;
+      font-size: 1.6rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .sdp-lb-prev:hover, .sdp-lb-next:hover { background: rgba(196,0,122,0.5); }
+    .sdp-lb-prev { right: 1.5rem; }
+    .sdp-lb-next { left: 1.5rem; }
+    .sdp-lb-counter {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.6);
+      font-size: 0.85rem;
+    }
+
+    /* === Info side === */
+    .sdp-info {}
+    .sdp-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      color: var(--gray);
+      text-decoration: none;
+      margin-bottom: 1.5rem;
+      transition: color 0.2s;
+    }
+    .sdp-back:hover { color: var(--magenta); }
+    .sdp-category {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--magenta);
+      background: rgba(196,0,122,0.08);
+      border: 1px solid rgba(196,0,122,0.2);
+      border-radius: 50px;
+      padding: 0.3rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .sdp-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--black);
+      margin-bottom: 1rem;
+      line-height: 1.3;
+    }
+    .sdp-title span { color: var(--gold); }
+    .sdp-desc {
+      color: var(--gray);
+      line-height: 1.9;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Items list */
+    .sdp-items-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(196,0,122,0.12);
+    }
+    .sdp-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+    }
+    .sdp-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--gray-light);
+    }
+    .sdp-item .fi {
+      width: 22px;
+      height: 22px;
+      background: rgba(196,0,122,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: var(--magenta);
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    /* CTA */
+    .sdp-cta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+    .sdp-cta .btn { flex: 1; text-align: center; min-width: 140px; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .sdp-layout { grid-template-columns: 1fr; }
+      .sdp-gallery { position: static; }
+      .sdp-main-img { aspect-ratio: 4/3; }
+    }
+    @media (max-width: 600px) {
+      .sdp-title { font-size: 1.5rem; }
+      .sdp-thumb { width: calc(25% - 0.45rem); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="images/logo.png" alt="Chifae Agency Logo" onerror="this.style.display='none'" />
+        <span class="nav-logo-text">CHIFAE <span>AGENCY</span></span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">الرئيسية</a></li>
+        <li><a href="services.html" class="active">الخدمات</a></li>
+        <li><a href="portfolio.html">أعمالنا</a></li>
+        <li><a href="shop.html">المتجر</a></li>
+        <li><a href="about.html">من نحن</a></li>
+        <li><a href="contact.html">تواصل معنا</a></li>
+        <li><a href="order.html" class="nav-cta">اطلب الآن</a></li>
+      </ul>
+      <button class="nav-toggle" aria-label="القائمة">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PAGE -->
+  <section class="service-detail-page">
+    <div class="container">
+      <div class="sdp-layout">
+
+        <!-- Gallery -->
+        <div class="sdp-gallery fade-up">
+          <div class="sdp-main-img" id="sdp-main-wrap">
+            <img id="sdp-main-img" src="" alt="" />
+          </div>
+          <div class="sdp-thumbs" id="sdp-thumbs"></div>
+        </div>
+
+        <!-- Info -->
+        <div class="sdp-info fade-up fade-up-delay-1">
+          <a href="services.html" class="sdp-back">← العودة إلى الخدمات</a>
+          <div class="sdp-category" id="sdp-category"></div>
+          <h1 class="sdp-title" id="sdp-title">...</h1>
+          <p class="sdp-desc" id="sdp-desc">...</p>
+
+          <div class="sdp-items-title">✦ ما تشمله الخدمة</div>
+          <div class="sdp-items-list" id="sdp-items"></div>
+
+          <div class="sdp-cta">
+            <a id="sdp-order-btn" href="order.html" class="btn btn-primary">اطلب هذه الخدمة ←</a>
+            <a href="https://wa.me/213655480095" class="btn btn-whatsapp" target="_blank">📱 واتساب</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div class="sdp-lightbox" id="sdp-lightbox">
+    <button class="sdp-lb-close" id="sdp-lb-close">✕</button>
+    <button class="sdp-lb-prev" id="sdp-lb-prev">›</button>
+    <button class="sdp-lb-next" id="sdp-lb-next">‹</button>
+    <img id="sdp-lb-img" src="" alt="" />
+    <div class="sdp-lb-counter" id="sdp-lb-counter"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <img src="images/logo.png" alt="Chifae Agency" onerror="this.style.display='none'" />
+            <span class="footer-logo-name">CHIFAE <span>AGENCY</span></span>
+          </div>
+          <p>وكالة إبداعية متخصصة في التصميم، الطباعة، والحلول الرقمية.</p>
+          <div class="footer-social">
+            <a href="https://wa.me/213655480095" class="social-btn" target="_blank" title="واتساب">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/chifae.agency" class="social-btn" target="_blank" title="انستغرام">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="url(#igG2)"><defs><linearGradient id="igG2" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#f09433"/><stop offset="50%" style="stop-color:#dc2743"/><stop offset="100%" style="stop-color:#bc1888"/></linearGradient></defs><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            </a>
+            <a href="https://www.facebook.com/ChifaeAgency/" class="social-btn" target="_blank" title="فيسبوك">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>الصفحات</h4>
+          <ul>
+            <li><a href="index.html">الرئيسية</a></li>
+            <li><a href="services.html">الخدمات</a></li>
+            <li><a href="portfolio.html">أعمالنا</a></li>
+            <li><a href="shop.html">المتجر</a></li>
+            <li><a href="about.html">من نحن</a></li>
+            <li><a href="contact.html">تواصل معنا</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>تواصل معنا</h4>
+          <ul>
+            <li><a href="https://wa.me/213655480095" target="_blank">واتساب</a></li>
+            <li><a href="https://www.instagram.com/chifae.agency" target="_blank">انستغرام</a></li>
+            <li><a href="https://www.facebook.com/ChifaeAgency/" target="_blank">فيسبوك</a></li>
+            <li><a href="mailto:servicedigital92@gmail.com">البريد الإلكتروني</a></li>
+            <li><a href="order.html">اطلب خدمة</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copy">© 2024 <span>Chifae Agency</span> — جميع الحقوق محفوظة</p>
+        <button class="back-to-top">↑</button>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    // ===== Services Data =====
+    const services = {
+      design: {
+        name: 'التصميم الجرافيكي',
+        nameStyled: 'التصميم <span>الجرافيكي</span>',
+        category: '🎨 تصميم',
+        desc: 'نصمم هويات بصرية احترافية تعكس روح علامتك التجارية وتجذب جمهورك المستهدف. كل تصميم فريد ومخصص لك وفق احتياجاتك وتوقعاتك.',
+        items: [
+          'تصميم لوغو احترافي',
+          'تصميم Packaging (كوسميتيك وغيره)',
+          'تصميم منشورات سوشيال ميديا',
+          'هوية بصرية متكاملة',
+          'بطاقات عمل وتصاميم مطبوعة',
+        ],
+        images: [
+          'images/services/design-01.jpg',
+          'images/services/design-02.jpg',
+          'images/services/design-03.jpg',
+          'images/services/design-04.jpg',
+          'images/services/design-05.jpg',
+          'images/services/design-06.jpg',
+          'images/services/design-07.jpg',
+          'images/services/design-08.jpg',
+          'images/services/design-09.jpg',
+          'images/services/design-10.jpg',
+          'images/services/design-11.jpg',
+          'images/services/design-12.jpg',
+        ],
+        orderLink: 'order.html?service=design',
+      },
+      print: {
+        name: 'الطباعة الحرارية',
+        nameStyled: 'الطباعة <span>الحرارية</span>',
+        category: '🖨️ طباعة',
+        desc: 'طباعة حرارية عالية الجودة على مختلف المواد والمنتجات. مثالية للهدايا المخصصة والترويج التجاري بألوان نابضة بالحياة.',
+        items: [
+          'طباعة على الكؤوس',
+          'طباعة على الملابس (T-shirt, Sweat...)',
+          'طباعة على Gourdes (قوارير)',
+          'هدايا مخصصة متنوعة',
+          'طباعة بالجملة للشركات',
+        ],
+        images: [
+          'images/services/print-01.jpg',
+          'images/services/print-02.jpg',
+          'images/services/print-03.jpg',
+          'images/services/print-04.jpg',
+          'images/services/print-05.jpg',
+          'images/services/print-06.jpg',
+          'images/services/print-07.jpg',
+          'images/services/print-08.jpg',
+          'images/services/print-09.jpg',
+          'images/services/print-10.jpg',
+          'images/services/print-11.jpg',
+          'images/services/print-12.jpg',
+        ],
+        orderLink: 'order.html?service=print',
+      },
+      cut: {
+        name: 'القص الإلكتروني',
+        nameStyled: 'القص <span>الإلكتروني</span>',
+        category: '✂️ قص إلكتروني',
+        desc: 'قص إلكتروني دقيق بتقنية Skycut لإنتاج ستيكرات، ديكورات، وقطع فنية بمختلف الأشكال والأحجام بدقة عالية.',
+        items: [
+          'ستيكرات مخصصة (Stickers)',
+          'ديكورات حائط وزجاج',
+          'قص بتقنية Skycut',
+          'لوحات وعلامات تجارية',
+          'أشكال وحروف مخصصة',
+        ],
+        images: [
+          'images/services/cut-01.jpg',
+          'images/services/cut-02.jpg',
+          'images/services/cut-03.jpg',
+          'images/services/cut-04.jpg',
+          'images/services/cut-05.jpg',
+          'images/services/cut-06.jpg',
+          'images/services/cut-07.jpg',
+          'images/services/cut-08.jpg',
+          'images/services/cut-09.jpg',
+          'images/services/cut-10.jpg',
+          'images/services/cut-11.jpg',
+          'images/services/cut-12.jpg',
+        ],
+        orderLink: 'order.html?service=cut',
+      },
+      products: {
+        name: 'المنتجات المخصصة',
+        nameStyled: 'المنتجات <span>المخصصة</span>',
+        category: '📒 منتجات',
+        desc: 'منتجات مصممة ومخصصة لتعكس شخصيتك أو علامتك التجارية، مثالية للاستخدام الشخصي أو كهدايا راقية.',
+        items: [
+          'Planner مخصص',
+          'دفاتر وأجندات مصممة',
+          'منتجات مخصصة حسب الطلب',
+          'مجموعات هدايا متكاملة',
+        ],
+        images: [
+          'images/services/products-01.jpg',
+          'images/services/products-02.jpg',
+          'images/services/products-03.jpg',
+          'images/services/products-04.jpg',
+          'images/services/products-05.jpg',
+          'images/services/products-06.jpg',
+          'images/services/products-07.jpg',
+          'images/services/products-08.jpg',
+          'images/services/products-09.jpg',
+          'images/services/products-10.jpg',
+          'images/services/products-11.jpg',
+          'images/services/products-12.jpg',
+        ],
+        orderLink: 'order.html?service=products',
+      },
+      digital: {
+        name: 'الحلول الرقمية',
+        nameStyled: 'الحلول <span>الرقمية</span>',
+        category: '💻 ديجيتال',
+        desc: 'نصمم ونطور مواقع وتطبيقات احترافية تمثل علامتك التجارية على الإنترنت وتمنح عملاءك تجربة مستخدم رائعة.',
+        items: [
+          'تصميم مواقع ويب',
+          'تصميم تطبيقات موبايل',
+          'متاجر إلكترونية',
+          'واجهات مستخدم (UI/UX)',
+          'لوحات تحكم ومنصات',
+        ],
+        images: [
+          'images/services/digital-01.jpg',
+          'images/services/digital-02.jpg',
+          'images/services/digital-03.jpg',
+          'images/services/digital-04.jpg',
+          'images/services/digital-05.jpg',
+          'images/services/digital-06.jpg',
+          'images/services/digital-07.jpg',
+          'images/services/digital-08.jpg',
+          'images/services/digital-09.jpg',
+          'images/services/digital-10.jpg',
+          'images/services/digital-11.jpg',
+          'images/services/digital-12.jpg',
+        ],
+        orderLink: 'order.html?service=digital',
+      },
+    };
+
+    // ===== Load service =====
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id') || 'design';
+    const s = services[id] || services['design'];
+
+    document.title = s.name + ' — Chifae Agency';
+
+    document.getElementById('sdp-category').textContent = s.category;
+    document.getElementById('sdp-title').innerHTML = s.nameStyled;
+    document.getElementById('sdp-desc').textContent = s.desc;
+    document.getElementById('sdp-order-btn').href = s.orderLink;
+
+    // Items
+    const itemsEl = document.getElementById('sdp-items');
+    s.items.forEach(item => {
+      itemsEl.innerHTML += `<div class="sdp-item"><span class="fi">✓</span>${item}</div>`;
+    });
+
+    // Gallery
+    const mainImg = document.getElementById('sdp-main-img');
+    const thumbsEl = document.getElementById('sdp-thumbs');
+    let currentIndex = 0;
+
+    mainImg.src = s.images[0];
+    mainImg.alt = s.name;
+
+    s.images.forEach((src, i) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'sdp-thumb' + (i === 0 ? ' active' : '');
+      thumb.innerHTML = `<img src="${src}" alt="${s.name} ${i + 1}" loading="lazy" />`;
+      thumb.addEventListener('click', () => switchImage(i));
+      thumbsEl.appendChild(thumb);
+    });
+
+    function switchImage(index) {
+      currentIndex = index;
+      mainImg.src = s.images[index];
+      thumbsEl.querySelectorAll('.sdp-thumb').forEach((t, i) => {
+        t.classList.toggle('active', i === index);
+      });
+    }
+
+    // Lightbox
+    const lightbox   = document.getElementById('sdp-lightbox');
+    const lbImg      = document.getElementById('sdp-lb-img');
+    const lbCounter  = document.getElementById('sdp-lb-counter');
+
+    function openLightbox(index) {
+      currentIndex = index;
+      lbImg.src = s.images[index];
+      lbCounter.textContent = (index + 1) + ' / ' + s.images.length;
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('sdp-main-wrap').addEventListener('click', () => openLightbox(currentIndex));
+    document.getElementById('sdp-lb-close').addEventListener('click', e => { e.stopPropagation(); closeLightbox(); });
+    lightbox.addEventListener('click', e => { if (e.target === lightbox || e.target === lbImg) closeLightbox(); });
+
+    document.getElementById('sdp-lb-next').addEventListener('click', e => {
+      e.stopPropagation();
+      const next = (currentIndex + 1) % s.images.length;
+      switchImage(next);
+      openLightbox(next);
+    });
+    document.getElementById('sdp-lb-prev').addEventListener('click', e => {
+      e.stopPropagation();
+      const prev = (currentIndex - 1 + s.images.length) % s.images.length;
+      switchImage(prev);
+      openLightbox(prev);
+    });
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') document.getElementById('sdp-lb-next').click();
+      if (e.key === 'ArrowRight') document.getElementById('sdp-lb-prev').click();
+    });
+  </script>
+</body>
+</html>
